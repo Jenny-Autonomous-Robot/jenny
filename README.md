@@ -1,9 +1,9 @@
 jenny
 =====
 
-An autonomous wheeled robot that solves mazes, avoids obstacles and counts objects on the way, and drops a package at a predetermined point
+An autonomous wheeled robot that solves mazes, avoids obstacles and counts objects on the way, and drops a package at a predetermined point.
 
-apogee_main.c :  Complete program for APOGEE - Track-o-mania; contains the latest working methods for sensor calibration, sensor reading, tag detection, wall avoidance, object counting, 
+**apogee_main.c** :  Complete program for APOGEE - Track-o-mania; contains the latest working methods for sensor calibration, sensor reading, tag detection, wall avoidance, object counting, 
                  and package dropping, and PWM based speed control of DC motors.
 
 polulu_qtr8rc_read_calibrate.c : contains functions for reading and calibrating Polulu's QTr-8RC reflectance sensor array with an 
