@@ -1,6 +1,30 @@
-/* P3 is connected to the 8 GPIOs dedicated to the Polulu QTR-8RC sensor array
-** pins l1-l8 refer to the 8 GPIOs connected to the 8 LEDs that display the status of the sesnor array
-** pin s_ON is connected to the LEDON pin of the sensor array*/
+/*************************************************************************
+
+Functions to read and calibrate Polulu QTR-8RC reflectance sensor 
+
+----------------------------------------------------------------
+Written by : Pranav N. Gour, Arun Subramaniyan, Sujay Narumanchi
+---------------------------------------------------------------
+
+We would be glad to respond to any specific queries via email:
+
+Pranav : f2011075@pilani.bits-pilani.ac.in
+Arun : f2011212@pilani.bits-pilani.ac.in
+Sujay : f2011025@pilani.bits-pilani.ac.in
+
+*************************************************************************
+
+Hardware Interfacing required:
+
+P3 is connected to the 8 GPIOs dedicated to the Polulu QTR-8RC sensor array
+
+Pins l1-l8 refer to the 8 GPIOs connected to the 8 LEDs that display the status
+of the sensor array
+
+Pin S_ON is connected to the LEDON pin of the sensor array
+
+*************************************************************************/
+
 
 #include <reg51.h>
 #include <reg_c51.h>
