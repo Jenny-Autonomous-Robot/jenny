@@ -1,35 +1,38 @@
-/*12 march 2013 : line following good, kp=5 good. speed is 190.
-				  tag sensing needs lots of improvement. relax cases for finding tag. is it overshooting tag? 
-				  Make sure it always detects tag when there is one. MAke sure it never detets tag when there isn't
-				  */
-
-/*13th march 2013 : tag following improving. we need to change the 
-case for tag detection such that s7 (and s2) is also allowed to report the tag.
-
-also, the going froward and turning thing taht we've done for the turn after tag has been detected is 
-good for Ys but not for Ts. Try go forward until time delay over OR all white.
-
-also at sharp turns, stop before turning.
-
-then work on calibration
-
-tag sensor performance improved a lot since we put double sticky tape just for the tags. 
-
-consider moving the tags to more accurate positions. just file a bit at edge of tag incision.
-
-we are usign the new readsensor which has delay(10) after every instruction, and where all sensors are being switched ona nd off
-for every read operation. the tag sensors are being controlled by controlling their goround through a level shifter.
 /*
-13th midnight
-tags are working well. next to do : moving on to detecting walls.
-one issue comes up : the sensor s8 stops working some times. we really need to prevent this. */
-/*14th midnght 
-tags are working very well. 
-s8 misbehaves sometmes still.
-sometimes, rarely, tag detected where it;s not. May be because of s8. May be we should replace it.
-*/
-/* TO BE TESTED*/
 
+Complete program for Jenny's participation in APOGEE 2013 - Trackomania Robotics Competition
+Problem statement URL: http://www.bits-apogee.org/2013/Automation/Track-o-Mania/
+
+----------------------------------------------------------------
+Written by : Pranav N. Gour, Arun Subramaniyan, Sujay Narumanchi
+---------------------------------------------------------------
+
+
+We are yet to add comments for individual methods. In the meanwhile, we would be
+glad to repsond to any specific queries via email:
+
+Pranav : f2011075@pilani.bits-pilani.ac.in
+Arun : f2011212@pilani.bits-pilani.ac.in
+Sujay : f2011025@pilani.bits-pilani.ac.in
+
+
+************************************************************************
+
+Hardware Interfacing required:
+
+P3 is connected to the 8 GPIOs dedicated to the Polulu QTR-8RC sensor array
+pins l1-l8 refer to the 8 GPIOs connected to the 8 LEDs that display the status of the sesnor array
+pin s_ON is connected to the LEDON pin of the sensor array
+Motor Driver control pins of left and right motors are connected to mb1, mb2, ma1, ma2.
+pin deadend_ir : IR transmitter-receiver pair's o/p pin for sensing proximity to objects in front
+sold_pin : IR transmitter-receiver pair's o/p pin for sideways object detection
+terr_pin : IR transmitter-receiver pair's o/p pin for sideways object detection at a different height than sold_pin
+buzzer_pin : output to buzzer
+tagsMatter : swicth to control tag's status in the program
+servo_pin : connected to servo controlling the gate to drop packages
+s_on : Connected to LEDON pin of Polulu QTR-8RC sensor array
+STOP : switch, starts program execution after initial calibration
+*/
 
 #include <reg51.h>
 #include <reg_c51.h>
@@ -49,15 +52,6 @@ sbit s6=P2^5;
 sbit s7=P2^6;
 sbit s8=P2^7;
 
-sbit l1=P2^0;
-sbit l2=P2^1;
-sbit l3=P2^2;
-sbit l4=P2^3;
-sbit l5=P2^4;
-sbit l6=P2^5;
-sbit l7=P2^6;
-sbit l8=P2^7;
-
 sbit cal=P3^3;
 
 sbit deadend_ir=P0^0;
@@ -68,15 +62,14 @@ sbit deadend_ir=P0^0;
 sbit sold_pin = P0^1;
 sbit terr_pin = P0^2;
 
-sbit buzzer_pin=P0^7;
+sbit buzzer_pin=P0^7; //Vcc pin of small 5V buzzer
 
-sbit tagsMatter = P1^0;
+sbit tagsMatter = P1^0; //control pin - can be a switch
 
-sbit servo_pin=P1^1;
+sbit servo_pin=P1^1;//gate-controlling servo to drop package
 		   
-sbit s1OFF=P0^4;
-sbit s6ON=P0^5;
-sbit s8OFF=P0^6; 
+
+sbit s_ON=P0^5;
 
 sbit STOP=P0^3;
 
@@ -647,39 +640,7 @@ void setMotors(int lval, int rval)
 	CCAP1L=(char)lval;
 	CCAP1H=(char)lval;
 }
-/*void autoCalibrate()
-{
-	
-} */ 
 
-/*{
-    delay(10); //this delay is NECESSARY. But why? Perhaps because it gives extra time for charging.
-    
-    TL1=0xF5;
-    TH1=0xFF; //10 microsec delay
-
-    P3=0xFF; //output mode to charge capacitor
-    P3=0xFF; //make sure capacitor is charged
-    TR1=1;  // start timer
-    while(TF1==0);//delay
-    TR1=0; // end timer
-    TF1=0; // VERY IMPORTANT!!!!
-    
-    //delay(10); This delay, if used instead of the previous one, still makes the system work. Not sure why.
-    
-    P3=0xFF; //now in input mode
-    
-    TL1=0x6D;
-    TH1=0xDB;// for 10 ms wait
-    TR1=1; // start timer
-    while(TF1==0); // checking for overflow
-    TR1=0; // end timer
-    TF1=0; // VERY IMPORTANT!!!!!
-    P2=P3;
-		//to show output
-    //delay(10);
-//value is now in P3
-}*/
 void setInitial()
 {
 	stopNow();
@@ -887,9 +848,8 @@ long int calib()
 	int j=0;
 	long int sens;
 	sens=0;
-    s6ON=1;
-	s1OFF=0;
-	s8OFF=0;
+	s_ON=1;
+	
 	P3=0xFF;
 	P3=0xFF;
 	while(cal==1)
@@ -897,9 +857,8 @@ long int calib()
 		sens++;
 		if(sens>10000)break;
 	}
-	s6ON=0;
-	s1OFF=1;
-	s8OFF=1;
+	s_ON=0;
+	
 	delay(10);
 	//beep(1);
 	//beep(sens/4);
@@ -943,18 +902,14 @@ void supercalib()
 
 void readSensor()
 {
-    s6ON=1;
-	s1OFF=0;
-	s8OFF=0;
+	s_ON=1;
 	delay(10);
 	P3=0xFF;
 	P3=0xFF;
 	smallDelay(whiteDelay);
 	P2=P3;
 	//delay(10);
-	s6ON=0;
-	s1OFF=1;
-	s8OFF=1;
+	s_ON=0;
 	delay(10);
 }
 
