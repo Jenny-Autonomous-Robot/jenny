@@ -1,4 +1,3 @@
-
 /* P3 is connected to the 8 GPIOs dedicated to the Polulu QTR-8RC sensor array
 ** pins l1-l8 refer to the 8 GPIOs connected to the 8 LEDs that display the status of the sesnor array
 ** pin s_ON is connected to the LEDON pin of the sensor array*/
@@ -107,7 +106,7 @@ void supercalib()
 	longBeep(1); //starting white calibration!
 
 	whiteDelay=calib();
-	if(whiteDelay<=0)whiteDelay=30;
+	if(whiteDelay<=0)whiteDelay=30; //default minimum value
 
 	delay(10000);//Place all the sensors on a completely black area
 	longBeep(2);
@@ -119,7 +118,8 @@ void supercalib()
 	longBeep(3);
 	delay(10000);
 	
-	if(blackDelay<whiteDelay)
+	if(blackDelay<whiteDelay) //this may happen in case of bad lighting. We set whiteDelay to a large value to 
+				  //allow sensors enough time to read a white space
 	{
 		whiteDelay=1200;
 	}
