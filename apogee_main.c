@@ -9,7 +9,7 @@ Written by : Pranav N. Gour, Arun Subramaniyan, Sujay Narumanchi
 
 
 We are yet to add comments for individual methods. In the meanwhile, we would be
-glad to repsond to any specific queries via email:
+glad to respond to any specific queries via email:
 
 Pranav : f2011075@pilani.bits-pilani.ac.in
 Arun : f2011212@pilani.bits-pilani.ac.in
